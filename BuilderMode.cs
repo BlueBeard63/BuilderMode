@@ -16,69 +16,106 @@ namespace Tortellio.BuilderMode
         public static BuilderMode Instance;
         public static string PluginName = "BuilderMode";
         public static string PluginVersion = " 1.0.2";
+        
         protected override void Load()
         {
             Instance = this;
+            
             Logger.Log("BuilderMode has been loaded!");
             Logger.Log(PluginName + PluginVersion, ConsoleColor.Yellow);
             Logger.Log("Made by Tortellio", ConsoleColor.Yellow);
+            
             BarricadeManager.onTransformRequested += HandleBarricadeTransform;
             StructureManager.onTransformRequested += HandleStructureTransform;
         }
+        
         protected override void Unload()
         {
             Instance = null;
+            
             Logger.Log("BuilderMode has been unloaded!");
             Logger.Log("Visit Tortellio Discord for more! https://discord.gg/pzQwsew", ConsoleColor.Yellow);
+            
             BarricadeManager.onTransformRequested -= HandleBarricadeTransform;
             StructureManager.onTransformRequested -= HandleStructureTransform;
         }
+        
 		private void HandleStructureTransform(CSteamID instigator, byte x, byte y, uint instanceID, ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
 		{
-			if (instigator != CSteamID.Nil)
+			if (instigator == CSteamID.Nil)
 			{
-				UnturnedPlayer player = UnturnedPlayer.FromCSteamID(instigator);
-				if (StructureManager.tryGetRegion(x, y, out StructureRegion structureRegion))
-				{
-					StructureDrop structureDrop = structureRegion.drops.Find((StructureDrop o) => o.instanceID == instanceID);
-					if (structureDrop != null)
-					{
-						StructureData serversideData = structureDrop.GetServersideData();
-						if (instigator.m_SteamID != serversideData.owner || Vector3.Distance(player.Position, serversideData.point) > Configuration.Instance.RestrictiveDistance || serversideData.point.y < Configuration.Instance.MinY || serversideData.point.y > Configuration.Instance.MaxY)
-						{
-							if (!player.HasPermission("builder.unrestricted"))
-							{
-								shouldAllow = false;
-								UnturnedChat.Say(player, BuilderMode.Instance.Translate("no_permission_restricted"));
-							}
-						}
-					}
-				}
+				return;
 			}
+			
+			var player = UnturnedPlayer.FromCSteamID(instigator);
+			if (!StructureManager.tryGetRegion(x, y, out var structureRegion))
+			{
+				return;
+			}
+			
+			var structureDrop = structureRegion.drops.Find(o => o.instanceID == instanceID);
+			if (structureDrop == null)
+			{
+				return;
+			}
+			
+			var serversideData = structureDrop.GetServersideData();
+			if (instigator.m_SteamID == serversideData.owner &&
+			    !(Vector3.Distance(player.Position, serversideData.point) >
+			      Configuration.Instance.RestrictiveDistance) &&
+			    !(serversideData.point.y < Configuration.Instance.MinY) &&
+			    !(serversideData.point.y > Configuration.Instance.MaxY))
+			{
+				return;
+			}
+			
+			if (player.HasPermission("builder.unrestricted"))
+			{
+				return;
+			}
+			
+			shouldAllow = false;
+			UnturnedChat.Say(player, BuilderMode.Instance.Translate("no_permission_restricted"));
 		}
+		
   		private void HandleBarricadeTransform(CSteamID instigator, byte x, byte y, ushort plant, uint instanceID, ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
-		{
-			if (instigator != CSteamID.Nil)
-			{
-				UnturnedPlayer player = UnturnedPlayer.FromCSteamID(instigator);
-				if (BarricadeManager.tryGetRegion(x, y, plant, out BarricadeRegion barricadeRegion))
-				{
-					BarricadeDrop barricadeDrop = barricadeRegion.drops.Find((BarricadeDrop o) => o.instanceID == instanceID);
-					if (barricadeDrop != null)
-					{
-						BarricadeData serversideData = barricadeDrop.GetServersideData();
-						if (instigator.m_SteamID != serversideData.owner || Vector3.Distance(player.Position, serversideData.point) > Configuration.Instance.RestrictiveDistance || serversideData.point.y < Configuration.Instance.MinY || serversideData.point.y > Configuration.Instance.MaxY)
-						{
-							if (!player.HasPermission("builder.unrestricted"))
-							{
-								shouldAllow = false;
-								UnturnedChat.Say(player, BuilderMode.Instance.Translate("no_permission_restricted"));
-							}
-						}
-					}
-				}
-			}
-		}
+	    {
+		    if (instigator == CSteamID.Nil)
+		    {
+			    return;
+		    }
+		    
+		    var player = UnturnedPlayer.FromCSteamID(instigator);
+		    if (!BarricadeManager.tryGetRegion(x, y, plant, out BarricadeRegion barricadeRegion))
+		    {
+			    return;
+		    }
+		    
+		    var barricadeDrop = barricadeRegion.drops.Find((BarricadeDrop o) => o.instanceID == instanceID);
+		    if (barricadeDrop == null)
+		    {
+			    return;
+		    }
+		    
+		    var serversideData = barricadeDrop.GetServersideData();
+		    if (instigator.m_SteamID == serversideData.owner &&
+		        !(Vector3.Distance(player.Position, serversideData.point) >
+		          Configuration.Instance.RestrictiveDistance) &&
+		        !(serversideData.point.y < Configuration.Instance.MinY) &&
+		        !(serversideData.point.y > Configuration.Instance.MaxY))
+		    {
+			    return;
+		    }
+						
+		    if (player.HasPermission("builder.unrestricted"))
+		    {
+			    return;
+		    }
+		    
+		    shouldAllow = false;
+		    UnturnedChat.Say(player, BuilderMode.Instance.Translate("no_permission_restricted"));
+	    }
+	    
         public void DoBuilder(UnturnedPlayer caller)
         {
             if (caller.Player.look.canUseWorkzone || caller.Player.look.canUseFreecam || caller.Player.look.canUseSpecStats)
@@ -96,18 +133,18 @@ namespace Tortellio.BuilderMode
                 if (Configuration.Instance.EnableServerAnnouncer) UnturnedChat.Say(Instance.Translate("b_on_message", caller.CharacterName), UnturnedChat.GetColorFromName(Configuration.Instance.MessageColor, Color.yellow));
             }
         }
+        
         public void CheckBuilder(UnturnedPlayer cplayer, IRocketPlayer caller)
         {
-            UnturnedPlayer player = (UnturnedPlayer)caller;
             if (cplayer != null && (cplayer.Player.look.canUseWorkzone || cplayer.Player.look.canUseFreecam || cplayer.Player.look.canUseSpecStats))
             {
-                UnturnedChat.Say(Instance.Translate("cb_on_message", caller is ConsolePlayer ? "Console" : caller.DisplayName, cplayer.DisplayName));
+                UnturnedChat.Say(Instance.Translate("cb_on_message", caller.DisplayName, cplayer.DisplayName));
                 return;
             }
-            else if (cplayer == null)
+            
+            if (cplayer == null)
             {
                 UnturnedChat.Say(caller, Translate("cb_not_found"));
-                return;
             }
         }
 
