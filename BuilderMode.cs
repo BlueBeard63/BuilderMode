@@ -76,7 +76,7 @@ namespace Tortellio.BuilderMode
             }
 
             shouldAllow = false;
-            UnturnedChat.Say(player, BuilderMode.Instance.Translate("no_permission_restricted"));
+            UnturnedChat.Say(player, Instance.Translate("no_permission_restricted"));
         }
 
         private void HandleBarricadeTransform(CSteamID instigator, byte x, byte y, ushort plant, uint instanceID,
@@ -115,7 +115,7 @@ namespace Tortellio.BuilderMode
             }
 
             shouldAllow = false;
-            UnturnedChat.Say(player, BuilderMode.Instance.Translate("no_permission_restricted"));
+            UnturnedChat.Say(player, Instance.Translate("no_permission_restricted"));
         }
 
         public void DoBuilder(UnturnedPlayer caller)
