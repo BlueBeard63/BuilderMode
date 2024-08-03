@@ -1,9 +1,9 @@
-﻿using Rocket.API;
+﻿using System.Collections.Generic;
+using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
-using System.Collections.Generic;
 
-namespace Tortellio.BuilderMode.Commands
+namespace BuilderMode.Commands
 {
     public class CommandCheckBuilder : IRocketCommand
     {

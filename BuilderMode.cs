@@ -1,15 +1,15 @@
-﻿using Rocket.API;
+﻿using System;
+using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
-using System;
 using UnityEngine;
 using Logger = Rocket.Core.Logging.Logger;
 
-namespace Tortellio.BuilderMode
+namespace BuilderMode
 {
     public class BuilderMode : RocketPlugin<Config>
     {
@@ -40,8 +40,7 @@ namespace Tortellio.BuilderMode
             StructureManager.onTransformRequested -= HandleStructureTransform;
         }
 
-        private void HandleStructureTransform(CSteamID instigator, byte x, byte y, uint instanceID, ref Vector3 point,
-            ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
+        private void HandleStructureTransform(CSteamID instigator, byte x, byte y, uint instanceID, ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
         {
             if (instigator == CSteamID.Nil)
             {
@@ -79,8 +78,7 @@ namespace Tortellio.BuilderMode
             UnturnedChat.Say(player, Instance.Translate("no_permission_restricted"));
         }
 
-        private void HandleBarricadeTransform(CSteamID instigator, byte x, byte y, ushort plant, uint instanceID,
-            ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
+        private void HandleBarricadeTransform(CSteamID instigator, byte x, byte y, ushort plant, uint instanceID, ref Vector3 point, ref byte angle_x, ref byte angle_y, ref byte angle_z, ref bool shouldAllow)
         {
             if (instigator == CSteamID.Nil)
             {

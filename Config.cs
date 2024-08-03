@@ -1,6 +1,6 @@
 ﻿using Rocket.API;
 
-namespace Tortellio.BuilderMode
+namespace BuilderMode
 {
     public class Config : IRocketPluginConfiguration
     {
